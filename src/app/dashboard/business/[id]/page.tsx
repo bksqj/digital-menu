@@ -35,7 +35,13 @@ export default async function BusinessOverviewPage({
   const menu = business.menus[0];
   const published = menu?.status === "PUBLISHED";
   const storage = getStorageAdapter();
-  const logoDisplayUrl = business.logoUrl ? storage.getUrl(business.logoUrl) : null;
+  // Cache-bust: the blob route serves files with a year-long immutable
+  // Cache-Control, but a re-uploaded logo overwrites the same storage key —
+  // without a version param a browser that cached the old logo would never
+  // see the new one.
+  const logoDisplayUrl = business.logoUrl
+    ? `${storage.getUrl(business.logoUrl)}?v=${business.updatedAt.getTime()}`
+    : null;
 
   const [viewCount, scanCount] = await Promise.all([
     db.analyticsEvent.count({ where: { businessId: business.id, type: "view" } }),

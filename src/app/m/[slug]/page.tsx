@@ -76,7 +76,13 @@ export default async function PublicMenuPage({
   }
 
   const categoriesWithItems = menu.categories.filter((category) => category.items.length > 0);
-  const logoDisplayUrl = business.logoUrl ? getStorageAdapter().getUrl(business.logoUrl) : null;
+  // Cache-bust: a re-uploaded logo overwrites the same storage key, but the
+  // blob route serves it with a year-long immutable Cache-Control — without
+  // a version param a guest's browser that already cached the old logo
+  // would never see a replaced one.
+  const logoDisplayUrl = business.logoUrl
+    ? `${getStorageAdapter().getUrl(business.logoUrl)}?v=${business.updatedAt.getTime()}`
+    : null;
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 bg-[var(--color-canvas)] px-5 py-10">

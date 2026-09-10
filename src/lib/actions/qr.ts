@@ -26,13 +26,13 @@ export async function buildAndStoreQr(business: QrTargetBusiness) {
   const svgKey = `qr/${business.id}.svg`;
   await storage.put(pngKey, png, "image/png");
   await storage.put(svgKey, Buffer.from(svg), "image/svg+xml");
-  await db.qrCode.upsert({
+  const qrCode = await db.qrCode.upsert({
     where: { businessId: business.id },
     create: { businessId: business.id, pngPath: pngKey, svgPath: svgKey },
     update: { pngPath: pngKey, svgPath: svgKey },
   });
 
-  return { pngKey, svgKey };
+  return { pngKey, svgKey, updatedAt: qrCode.updatedAt };
 }
 
 export async function regenerateQrAction(formData: FormData) {

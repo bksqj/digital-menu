@@ -26,12 +26,20 @@ export default async function QrPage({
   // first time — after that this is a single cheap read. Uploading/removing
   // a logo re-triggers it explicitly (see lib/actions/logo.ts); otherwise
   // there's a manual "Обновить" button below for anything else that changed.
-  const { pngKey, svgKey } =
+  const { pngKey, svgKey, updatedAt } =
     business.qrCode?.pngPath && business.qrCode?.svgPath
-      ? { pngKey: business.qrCode.pngPath, svgKey: business.qrCode.svgPath }
+      ? { pngKey: business.qrCode.pngPath, svgKey: business.qrCode.svgPath, updatedAt: business.qrCode.updatedAt }
       : await buildAndStoreQr(business);
 
   const storage = getStorageAdapter();
+  // The PNG/SVG live at a stable key that gets overwritten in place on
+  // regeneration, but the blob route serves them with a year-long immutable
+  // Cache-Control — without a version param, a browser that cached the old
+  // bytes (e.g. the plain-circle placeholder before a logo existed) would
+  // keep showing them forever even after the real logo is composited in.
+  const version = updatedAt.getTime();
+  const pngUrl = `${storage.getUrl(pngKey)}?v=${version}`;
+  const svgUrl = `${storage.getUrl(svgKey)}?v=${version}`;
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-5 py-12 sm:px-6 sm:py-16">
@@ -48,7 +56,7 @@ export default async function QrPage({
       <div className="flex flex-col items-center gap-6 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-8">
         {/* eslint-disable-next-line @next/next/no-img-element -- local file, regenerated per request, not worth next/image config for an MVP */}
         <img
-          src={storage.getUrl(pngKey)}
+          src={pngUrl}
           alt={`QR-код меню ${business.name}`}
           className="h-64 w-64 rounded-xl border border-[var(--color-line)]"
         />
@@ -58,14 +66,14 @@ export default async function QrPage({
 
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <a
-          href={storage.getUrl(pngKey)}
+          href={pngUrl}
           download={`qr-${business.slug}.png`}
           className="rounded-full bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-accent-strong)] hover:text-white"
         >
           Скачать PNG
         </a>
         <a
-          href={storage.getUrl(svgKey)}
+          href={svgUrl}
           download={`qr-${business.slug}.svg`}
           className="rounded-full border border-[var(--color-line)] px-5 py-2.5 text-sm font-medium text-[var(--color-ink)] transition hover:border-[var(--color-ink)]"
         >
