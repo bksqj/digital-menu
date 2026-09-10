@@ -3,9 +3,13 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getStorageAdapter } from "@/lib/storage";
+import { getDailyStats } from "@/lib/analytics";
 import { deleteBusinessAction } from "@/lib/actions/business";
 import { LogoUploader } from "@/components/business/logo-uploader";
+import { AnalyticsChart } from "@/components/business/analytics-chart";
 import { LinkIcon, UploadIcon, PencilIcon, LinkQrIcon } from "@/components/ui/icons";
+
+const ANALYTICS_WINDOW_DAYS = 14;
 
 const LOGO_ERROR_MESSAGES: Record<string, string> = {
   no_logo: "Выберите файл логотипа.",
@@ -43,9 +47,10 @@ export default async function BusinessOverviewPage({
     ? `${storage.getUrl(business.logoUrl)}?v=${business.updatedAt.getTime()}`
     : null;
 
-  const [viewCount, scanCount] = await Promise.all([
+  const [viewCount, scanCount, dailyStats] = await Promise.all([
     db.analyticsEvent.count({ where: { businessId: business.id, type: "view" } }),
     db.analyticsEvent.count({ where: { businessId: business.id, type: "qr_scan" } }),
+    getDailyStats(business.id, ANALYTICS_WINDOW_DAYS),
   ]);
 
   const actions = [
@@ -100,6 +105,10 @@ export default async function BusinessOverviewPage({
           <p className="text-2xl font-bold tracking-tight text-[var(--color-ink)]">{scanCount}</p>
           <p className="text-xs text-[var(--color-subtle)]">Сканирования QR</p>
         </div>
+      </div>
+
+      <div className="mb-8">
+        <AnalyticsChart stats={dailyStats} />
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
