@@ -133,20 +133,23 @@ export function ItemRow({
           type="button"
           onClick={toggleAvailable}
           disabled={isPending}
-          className="text-xs text-[var(--color-subtle)] underline hover:text-[var(--color-ink)] disabled:opacity-50"
+          className="rounded-full border border-[var(--color-line)] px-2.5 py-1 text-xs font-medium text-[var(--color-subtle)] transition hover:border-[var(--color-ink)] hover:text-[var(--color-ink)] disabled:opacity-50"
         >
           {item.available ? "Скрыть" : "Показать"}
         </button>
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="text-xs text-[var(--color-subtle)] underline hover:text-[var(--color-ink)]"
+          className="rounded-full border border-[var(--color-line)] px-2.5 py-1 text-xs font-medium text-[var(--color-subtle)] transition hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
         >
           Изменить
         </button>
         <form action={deleteItemAction}>
           <input type="hidden" name="itemId" value={item.id} />
-          <button type="submit" className="text-xs text-red-600 underline">
+          <button
+            type="submit"
+            className="rounded-full border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50"
+          >
             Удалить
           </button>
         </form>

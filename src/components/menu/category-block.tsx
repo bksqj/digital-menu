@@ -52,7 +52,10 @@ export function CategoryBlock({
         </form>
         <form action={deleteCategoryAction}>
           <input type="hidden" name="categoryId" value={category.id} />
-          <button type="submit" className="text-xs text-red-600 underline">
+          <button
+            type="submit"
+            className="rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50"
+          >
             Удалить
           </button>
         </form>
@@ -128,7 +131,7 @@ export function CategoryBlock({
         <button
           type="button"
           onClick={() => setAddingItem(true)}
-          className="mt-3 text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]"
+          className="mt-3 w-full rounded-lg border border-dashed border-[var(--color-line)] px-4 py-2 text-sm font-medium text-[var(--color-subtle)] transition hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
         >
           + Добавить позицию
         </button>
