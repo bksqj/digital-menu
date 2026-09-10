@@ -106,14 +106,14 @@ export function ItemRow({
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDrop={onDrop}
-      className={`flex items-center gap-3 rounded-lg border border-transparent px-2 py-2 hover:border-neutral-200 ${
+      className={`flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-transparent px-2 py-2 hover:border-neutral-200 ${
         !item.available ? "opacity-50" : ""
       }`}
     >
       <span className="cursor-grab text-neutral-300" aria-hidden>
         ⠿
       </span>
-      <div className="flex-1">
+      <div className="min-w-[140px] flex-1">
         <div className="flex items-center gap-2">
           <span className="font-medium">{item.name}</span>
           {item.needsReview && (
@@ -124,32 +124,36 @@ export function ItemRow({
         </div>
         {item.description && <p className="text-sm text-neutral-500">{item.description}</p>}
       </div>
-      {item.price !== null && (
-        <span className="text-sm font-medium text-neutral-700">
-          {item.price} {item.currency}
-        </span>
-      )}
-      <button
-        type="button"
-        onClick={toggleAvailable}
-        disabled={isPending}
-        className="text-xs text-neutral-500 underline disabled:opacity-50"
-      >
-        {item.available ? "Скрыть" : "Показать"}
-      </button>
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className="text-xs text-neutral-500 underline"
-      >
-        Изменить
-      </button>
-      <form action={deleteItemAction}>
-        <input type="hidden" name="itemId" value={item.id} />
-        <button type="submit" className="text-xs text-red-600 underline">
-          Удалить
+      {/* Wraps to its own line as a unit on narrow screens instead of each
+          button clipping individually against the viewport edge. */}
+      <div className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        {item.price !== null && (
+          <span className="text-sm font-medium text-neutral-700 whitespace-nowrap">
+            {item.price} {item.currency}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={toggleAvailable}
+          disabled={isPending}
+          className="text-xs text-neutral-500 underline disabled:opacity-50"
+        >
+          {item.available ? "Скрыть" : "Показать"}
         </button>
-      </form>
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="text-xs text-neutral-500 underline"
+        >
+          Изменить
+        </button>
+        <form action={deleteItemAction}>
+          <input type="hidden" name="itemId" value={item.id} />
+          <button type="submit" className="text-xs text-red-600 underline">
+            Удалить
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
