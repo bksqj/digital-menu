@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getStorageAdapter } from "@/lib/storage";
 import { createBusinessSchema } from "@/lib/validation/menu";
 import { slugify } from "@/lib/slug";
 
@@ -44,8 +45,25 @@ export async function deleteBusinessAction(formData: FormData) {
   const userId = await requireUserId();
   const id = String(formData.get("id") ?? "");
 
-  const business = await db.business.findUnique({ where: { id } });
+  const business = await db.business.findUnique({
+    where: { id },
+    include: { qrCode: true, uploadJobs: { select: { sourceKeys: true } } },
+  });
   if (!business || business.ownerId !== userId) redirect("/dashboard");
+
+  // The DB row cascades (QrCode/Menu/Category/Item/UploadJob/AnalyticsEvent
+  // all onDelete: Cascade), but the actual files in blob storage don't —
+  // clean those up too so deleting a business doesn't just leave them
+  // orphaned forever. Best-effort: a failed blob delete shouldn't block
+  // removing the business itself.
+  const storage = getStorageAdapter();
+  const keysToDelete = [
+    business.logoUrl,
+    business.qrCode?.pngPath,
+    business.qrCode?.svgPath,
+    ...business.uploadJobs.flatMap((job) => job.sourceKeys),
+  ].filter((key): key is string => Boolean(key));
+  await Promise.allSettled(keysToDelete.map((key) => storage.delete(key)));
 
   await db.business.delete({ where: { id } });
   redirect("/dashboard");
