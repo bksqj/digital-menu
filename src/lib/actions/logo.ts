@@ -5,7 +5,16 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getStorageAdapter } from "@/lib/storage";
+import { buildAndStoreQr } from "@/lib/actions/qr";
 import { ALLOWED_LOGO_FILE_TYPES, MAX_LOGO_FILE_SIZE_BYTES } from "@/lib/upload-constraints";
+
+// The QR page skips regeneration once a QrCode row exists (it's not cheap —
+// sharp + two Blob writes), so a logo change has to explicitly refresh it,
+// otherwise the code would keep showing the old logo/plain badge forever.
+async function refreshQrIfExists(business: { id: string; slug: string; logoUrl: string | null }) {
+  const existing = await db.qrCode.findUnique({ where: { businessId: business.id } });
+  if (existing) await buildAndStoreQr(business);
+}
 
 async function requireOwnedBusiness(businessId: string, userId: string) {
   const business = await db.business.findUnique({ where: { id: businessId } });
@@ -35,8 +44,10 @@ export async function uploadLogoAction(formData: FormData) {
   const buffer = Buffer.from(await file.arrayBuffer());
   await storage.put(key, buffer, file.type);
 
-  await db.business.update({ where: { id: business.id }, data: { logoUrl: key } });
+  const updated = await db.business.update({ where: { id: business.id }, data: { logoUrl: key } });
+  await refreshQrIfExists(updated);
   revalidatePath(businessPath);
+  revalidatePath(`/dashboard/business/${businessId}/qr`);
   revalidatePath(`/m/${business.slug}`);
 }
 
@@ -49,9 +60,11 @@ export async function removeLogoAction(formData: FormData) {
   if (business.logoUrl) {
     const storage = getStorageAdapter();
     await storage.delete(business.logoUrl);
-    await db.business.update({ where: { id: business.id }, data: { logoUrl: null } });
+    const updated = await db.business.update({ where: { id: business.id }, data: { logoUrl: null } });
+    await refreshQrIfExists(updated);
   }
 
   revalidatePath(`/dashboard/business/${businessId}`);
+  revalidatePath(`/dashboard/business/${businessId}/qr`);
   revalidatePath(`/m/${business.slug}`);
 }

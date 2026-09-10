@@ -3,6 +3,7 @@
 import { useState, type DragEvent } from "react";
 import { createItemAction, deleteCategoryAction, renameCategoryAction } from "@/lib/actions/menu";
 import { ItemRow, type ItemDTO } from "./item-row";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export type CategoryDTO = { id: string; name: string; items: ItemDTO[] };
 
@@ -111,12 +112,12 @@ export function CategoryBlock({
               maxLength={3}
               className="w-16 rounded-lg border border-neutral-300 px-3 py-2 text-sm uppercase outline-none focus:border-neutral-900"
             />
-            <button
-              type="submit"
+            <SubmitButton
+              pendingLabel="Добавляем…"
               className="ml-auto rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white"
             >
               Добавить
-            </button>
+            </SubmitButton>
             <button
               type="button"
               onClick={() => setAddingItem(false)}

@@ -9,6 +9,7 @@ import {
   setMenuStatusAction,
 } from "@/lib/actions/menu";
 import { CategoryBlock, type CategoryDTO } from "./category-block";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export function MenuEditor({
   businessId,
@@ -127,12 +128,12 @@ export function MenuEditor({
           placeholder="Название категории, например «Пицца»"
           className="flex-1 rounded-lg border border-neutral-300 px-3.5 py-2.5 text-base outline-none focus:border-neutral-900"
         />
-        <button
-          type="submit"
+        <SubmitButton
+          pendingLabel="Добавляем…"
           className="whitespace-nowrap rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium transition hover:border-neutral-900"
         >
           + Категория
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

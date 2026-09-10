@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { createBusinessAction } from "@/lib/actions/business";
 import { logoutAction } from "@/lib/actions/auth";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 const ERROR_MESSAGES: Record<string, string> = {
   name: "Введите название бизнеса.",
@@ -67,12 +68,12 @@ export default async function DashboardPage({
           placeholder="Название бизнеса, например «Bella Roma»"
           className="flex-1 rounded-lg border border-neutral-300 px-3.5 py-2.5 text-base outline-none focus:border-neutral-900"
         />
-        <button
-          type="submit"
+        <SubmitButton
+          pendingLabel="Создаём…"
           className="whitespace-nowrap rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700"
         >
           + Создать
-        </button>
+        </SubmitButton>
       </form>
     </main>
   );

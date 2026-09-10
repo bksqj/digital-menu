@@ -3,8 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getStorageAdapter } from "@/lib/storage";
-import { generateQr } from "@/lib/qr";
+import { buildAndStoreQr, regenerateQrAction } from "@/lib/actions/qr";
 import { CopyLinkButton } from "@/components/business/copy-link-button";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export default async function QrPage({
   params,
@@ -15,34 +16,22 @@ export default async function QrPage({
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const business = await db.business.findUnique({ where: { id } });
+  const business = await db.business.findUnique({ where: { id }, include: { qrCode: true } });
   if (!business) notFound();
   if (business.ownerId !== session.user.id) notFound();
 
   const menuUrl = `${process.env.NEXT_PUBLIC_APP_URL}/m/${business.slug}`;
-  // Only the code itself carries ?src=qr — copy/share links stay clean —
-  // so the public page can count scans separately from regular views.
-  const qrTargetUrl = `${menuUrl}?src=qr`;
+
+  // The heavy part (sharp compositing + two Blob writes) only runs the
+  // first time — after that this is a single cheap read. Uploading/removing
+  // a logo re-triggers it explicitly (see lib/actions/logo.ts); otherwise
+  // there's a manual "Обновить" button below for anything else that changed.
+  const { pngKey, svgKey } =
+    business.qrCode?.pngPath && business.qrCode?.svgPath
+      ? { pngKey: business.qrCode.pngPath, svgKey: business.qrCode.svgPath }
+      : await buildAndStoreQr(business);
 
   const storage = getStorageAdapter();
-  // Falls back to no logo instead of crashing the page if the blob is
-  // missing — e.g. a logoUrl recorded while testing against a different
-  // storage backend (local disk vs. Netlify Blobs) than the one live now.
-  const logoBytes = business.logoUrl ? await storage.get(business.logoUrl).catch(() => undefined) : undefined;
-
-  // Regenerated on every visit — cheap (local render, no external API) and
-  // keeps the QR in sync if the business name/logo changes later. The
-  // encoded URL itself never changes, since it's keyed off the stable slug.
-  const { png, svg } = await generateQr({ url: qrTargetUrl, logo: logoBytes });
-  const pngKey = `qr/${business.id}.png`;
-  const svgKey = `qr/${business.id}.svg`;
-  await storage.put(pngKey, png, "image/png");
-  await storage.put(svgKey, Buffer.from(svg), "image/svg+xml");
-  await db.qrCode.upsert({
-    where: { businessId: business.id },
-    create: { businessId: business.id, pngPath: pngKey, svgPath: svgKey },
-    update: { pngPath: pngKey, svgPath: svgKey },
-  });
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-6 py-16">
@@ -88,6 +77,13 @@ export default async function QrPage({
           Открыть меню
         </Link>
       </div>
+
+      <form action={regenerateQrAction} className="mt-6 text-center">
+        <input type="hidden" name="businessId" value={business.id} />
+        <SubmitButton pendingLabel="Обновляем…" className="text-sm text-neutral-500 underline">
+          Обновить QR
+        </SubmitButton>
+      </form>
     </main>
   );
 }
