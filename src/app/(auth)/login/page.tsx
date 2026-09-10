@@ -36,7 +36,12 @@ export default async function LoginPage({
           />
         </label>
         <label className="flex flex-col gap-1.5 text-sm">
-          Пароль
+          <span className="flex items-center justify-between">
+            Пароль
+            <Link href="/forgot-password" className="text-xs text-neutral-500 underline">
+              Забыли пароль?
+            </Link>
+          </span>
           <input
             type="password"
             name="password"
