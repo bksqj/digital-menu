@@ -31,15 +31,17 @@ export default async function MenuUploadPage({
   if (business.ownerId !== session.user.id) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
+    <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-6 sm:py-16">
       <Link
         href={`/dashboard/business/${business.id}`}
-        className="text-sm text-neutral-500 underline"
+        className="text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]"
       >
         ← {business.name}
       </Link>
-      <h1 className="mt-4 mb-2 text-2xl font-semibold">Загрузить меню</h1>
-      <p className="mb-8 text-sm text-neutral-500">
+      <h1 className="mt-4 mb-2 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+        Загрузить меню
+      </h1>
+      <p className="mb-8 text-sm text-[var(--color-subtle)]">
         Сфотографируйте бумажное меню или прайс — мы распознаем позиции и категории, а вы
         проверите результат перед публикацией.
       </p>
@@ -52,11 +54,11 @@ export default async function MenuUploadPage({
 
       <UploadMenuForm businessId={business.id} />
 
-      <p className="mt-8 text-center text-sm text-neutral-500">
+      <p className="mt-8 text-center text-sm text-[var(--color-subtle)]">
         Или сразу{" "}
         <Link
           href={`/dashboard/business/${business.id}/menu/editor`}
-          className="font-medium text-neutral-900 underline"
+          className="font-medium text-[var(--color-ink)] underline"
         >
           добавьте меню вручную
         </Link>

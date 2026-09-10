@@ -1,4 +1,4 @@
-import { UploadIcon, SparkleIcon, LinkQrIcon } from "./icons";
+import { UploadIcon, SparkleIcon, LinkQrIcon } from "@/components/ui/icons";
 
 const STEPS = [
   {

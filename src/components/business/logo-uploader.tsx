@@ -16,19 +16,15 @@ export function LogoUploader({
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="relative shrink-0">
       <form ref={formRef} action={uploadLogoAction}>
         <input type="hidden" name="businessId" value={businessId} />
-        <label className="group relative block h-16 w-16 cursor-pointer overflow-hidden rounded-full">
+        <label className="group relative block h-16 w-16 cursor-pointer overflow-hidden rounded-full border border-[var(--color-line)]">
           {logoDisplayUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- local upload path, not worth next/image config for an MVP
-            <img
-              src={logoDisplayUrl}
-              alt={businessName}
-              className="h-full w-full object-cover"
-            />
+            <img src={logoDisplayUrl} alt={businessName} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-xl font-semibold text-neutral-400">
+            <div className="flex h-full w-full items-center justify-center bg-[var(--color-accent-soft)] text-xl font-semibold text-[var(--color-accent-strong)]">
               {businessName.charAt(0).toUpperCase()}
             </div>
           )}
@@ -46,10 +42,15 @@ export function LogoUploader({
       </form>
 
       {logoDisplayUrl && (
-        <form action={removeLogoAction}>
+        <form action={removeLogoAction} className="absolute -top-1 -right-1">
           <input type="hidden" name="businessId" value={businessId} />
-          <button type="submit" className="text-xs text-red-600 underline">
-            Удалить логотип
+          <button
+            type="submit"
+            title="Удалить логотип"
+            aria-label="Удалить логотип"
+            className="flex h-5 w-5 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] text-xs text-[var(--color-subtle)] shadow-sm hover:text-red-600"
+          >
+            ×
           </button>
         </form>
       )}

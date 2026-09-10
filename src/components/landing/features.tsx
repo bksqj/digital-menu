@@ -1,4 +1,4 @@
-import { SparkleIcon, PencilIcon, LinkQrIcon, PhoneIcon, BoltIcon, LinkIcon } from "./icons";
+import { SparkleIcon, PencilIcon, LinkQrIcon, PhoneIcon, BoltIcon, LinkIcon } from "@/components/ui/icons";
 
 const FEATURES = [
   {

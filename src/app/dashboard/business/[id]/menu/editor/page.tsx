@@ -52,17 +52,19 @@ export default async function MenuEditorPage({
   }));
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
+    <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-6 sm:py-16">
       <Link
         href={`/dashboard/business/${business.id}`}
-        className="text-sm text-neutral-500 underline"
+        className="text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]"
       >
         ← {business.name}
       </Link>
-      <h1 className="mt-4 mb-8 text-2xl font-semibold">Редактор меню</h1>
+      <h1 className="mt-4 mb-8 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+        Редактор меню
+      </h1>
 
       {imported && (
-        <p className="mb-6 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
+        <p className="mb-6 rounded-lg bg-[var(--color-accent-soft)] px-4 py-3 text-sm text-[var(--color-accent-strong)]">
           Распознали {importedCategories} {importedCategories === "1" ? "категорию" : "категории"}{" "}
           и {imported} {imported === "1" ? "позицию" : "позиций"}.
           {flagged && flagged !== "0" && (

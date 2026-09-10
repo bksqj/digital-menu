@@ -17,7 +17,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
     <button
       type="submit"
       disabled={disabled || pending}
-      className="rounded-full bg-neutral-900 px-6 py-3 text-base font-medium text-white transition hover:bg-neutral-700 disabled:opacity-50"
+      className="rounded-full bg-[var(--color-accent)] px-6 py-3 text-base font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-accent-strong)] hover:text-white disabled:opacity-50 disabled:hover:bg-[var(--color-accent)] disabled:hover:text-[var(--color-ink)]"
     >
       {pending ? "Распознаём ваше меню…" : "Загрузить и распознать"}
     </button>
@@ -65,12 +65,14 @@ export function UploadMenuForm({ businessId }: { businessId: string }) {
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className={`flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed px-6 py-12 text-center transition ${
-          isDragging ? "border-neutral-900 bg-neutral-50" : "border-neutral-300"
+        className={`flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-6 py-12 text-center transition ${
+          isDragging
+            ? "border-[var(--color-accent-strong)] bg-[var(--color-accent-soft)]"
+            : "border-[var(--color-line)] bg-[var(--color-surface)] hover:border-[var(--color-ink)]/30"
         }`}
       >
-        <p className="font-medium">Перетащите фото меню сюда</p>
-        <p className="text-sm text-neutral-500">
+        <p className="font-medium text-[var(--color-ink)]">Перетащите фото меню сюда</p>
+        <p className="text-sm text-[var(--color-subtle)]">
           или нажмите, чтобы выбрать файлы — JPG, PNG, WEBP или PDF, до {MAX_MENU_FILES} шт.
         </p>
         <input
@@ -90,10 +92,10 @@ export function UploadMenuForm({ businessId }: { businessId: string }) {
           {files.map((file, index) => (
             <li
               key={`${file.name}-${index}`}
-              className="flex items-center justify-between rounded-lg border border-neutral-200 px-3.5 py-2.5 text-sm"
+              className="flex items-center justify-between rounded-lg border border-[var(--color-line)] bg-[var(--color-surface)] px-3.5 py-2.5 text-sm"
             >
-              <span className="truncate">{file.name}</span>
-              <span className="flex items-center gap-3 text-neutral-500">
+              <span className="truncate text-[var(--color-ink)]">{file.name}</span>
+              <span className="flex items-center gap-3 text-[var(--color-subtle)]">
                 {formatSize(file.size)}
                 <button
                   type="button"

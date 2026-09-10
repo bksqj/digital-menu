@@ -66,9 +66,9 @@ export default async function PublicMenuPage({
 
   if (!business || !menu) {
     return (
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-2 px-6 py-16 text-center">
-        <h1 className="text-xl font-semibold">Меню пока недоступно</h1>
-        <p className="text-sm text-neutral-500">
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-2 bg-[var(--color-canvas)] px-6 py-16 text-center">
+        <h1 className="text-xl font-semibold text-[var(--color-ink)]">Меню пока недоступно</h1>
+        <p className="text-sm text-[var(--color-subtle)]">
           Владелец ещё не опубликовал это меню. Загляните позже.
         </p>
       </main>
@@ -79,46 +79,49 @@ export default async function PublicMenuPage({
   const logoDisplayUrl = business.logoUrl ? getStorageAdapter().getUrl(business.logoUrl) : null;
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-5 py-10">
+    <main className="mx-auto w-full max-w-md flex-1 bg-[var(--color-canvas)] px-5 py-10">
       <header className="mb-8 flex flex-col items-center gap-3 text-center">
         {logoDisplayUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- local upload path, not worth next/image config for an MVP
           <img
             src={logoDisplayUrl}
             alt={business.name}
-            className="h-20 w-20 rounded-full object-cover"
+            className="h-20 w-20 rounded-full border border-[var(--color-line)] object-cover"
           />
         ) : (
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100 text-2xl font-semibold text-neutral-400">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-accent-soft)] text-2xl font-semibold text-[var(--color-accent-strong)]">
             {business.name.charAt(0).toUpperCase()}
           </div>
         )}
-        <h1 className="text-2xl font-semibold">{business.name}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+          {business.name}
+        </h1>
         {business.description && (
-          <p className="text-sm text-neutral-500">{business.description}</p>
+          <p className="text-sm text-[var(--color-subtle)]">{business.description}</p>
         )}
       </header>
 
       {categoriesWithItems.length === 0 ? (
-        <p className="text-center text-sm text-neutral-500">Меню скоро появится.</p>
+        <p className="text-center text-sm text-[var(--color-subtle)]">Меню скоро появится.</p>
       ) : (
         <div className="flex flex-col gap-8">
           {categoriesWithItems.map((category) => (
             <section key={category.id}>
-              <h2 className="mb-3 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
+              <h2 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-[var(--color-subtle)] uppercase">
+                <span className="h-2.5 w-1 rounded-full bg-[var(--color-accent)]" />
                 {category.name}
               </h2>
-              <ul className="flex flex-col gap-4">
+              <ul className="flex flex-col divide-y divide-[var(--color-line)]">
                 {category.items.map((item) => (
-                  <li key={item.id} className="flex items-start justify-between gap-4">
+                  <li key={item.id} className="flex items-start justify-between gap-4 py-3 first:pt-0">
                     <div>
-                      <p className="font-medium">{item.name}</p>
+                      <p className="font-medium text-[var(--color-ink)]">{item.name}</p>
                       {item.description && (
-                        <p className="mt-0.5 text-sm text-neutral-500">{item.description}</p>
+                        <p className="mt-0.5 text-sm text-[var(--color-subtle)]">{item.description}</p>
                       )}
                     </div>
                     {item.price !== null && (
-                      <p className="shrink-0 font-medium whitespace-nowrap">
+                      <p className="shrink-0 font-semibold whitespace-nowrap text-[var(--color-ink)]">
                         {Number(item.price)} {item.currency}
                       </p>
                     )}
@@ -130,7 +133,7 @@ export default async function PublicMenuPage({
         </div>
       )}
 
-      <footer className="mt-12 border-t border-neutral-100 pt-6 text-center text-xs text-neutral-400">
+      <footer className="mt-12 border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-subtle)]">
         Сделано на Digital Menu
       </footer>
     </main>

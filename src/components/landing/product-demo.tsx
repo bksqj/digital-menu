@@ -1,4 +1,4 @@
-import { UploadIcon, SparkleIcon } from "./icons";
+import { UploadIcon, SparkleIcon } from "@/components/ui/icons";
 import { PhoneMockup } from "./phone-mockup";
 import { QrMockup } from "./qr-mockup";
 

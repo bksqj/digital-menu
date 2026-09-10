@@ -20,7 +20,7 @@ export function CopyLinkButton({ url }: { url: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="text-sm font-medium text-neutral-900 underline"
+      className="text-sm font-medium text-[var(--color-ink)] underline"
     >
       {copied ? "Скопировано!" : "Скопировать ссылку"}
     </button>

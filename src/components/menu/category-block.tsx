@@ -7,6 +7,9 @@ import { SubmitButton } from "@/components/ui/submit-button";
 
 export type CategoryDTO = { id: string; name: string; items: ItemDTO[] };
 
+const fieldClass =
+  "rounded-lg border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none focus:border-[var(--color-ink)]";
+
 export function CategoryBlock({
   category,
   draggable,
@@ -31,10 +34,10 @@ export function CategoryBlock({
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDrop={onDrop}
-      className="rounded-xl border border-neutral-200 p-4"
+      className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4"
     >
       <div className="mb-3 flex items-center gap-3">
-        <span className="cursor-grab text-neutral-300" aria-hidden>
+        <span className="cursor-grab text-[var(--color-line)]" aria-hidden>
           ⠿
         </span>
         <form action={renameCategoryAction} className="flex-1">
@@ -44,7 +47,7 @@ export function CategoryBlock({
             name="name"
             defaultValue={category.name}
             onBlur={(e) => e.currentTarget.form?.requestSubmit()}
-            className="w-full bg-transparent text-base font-semibold tracking-wide uppercase outline-none focus:underline"
+            className="w-full bg-transparent text-base font-semibold tracking-wide text-[var(--color-ink)] uppercase outline-none focus:underline"
           />
         </form>
         <form action={deleteCategoryAction}>
@@ -70,7 +73,7 @@ export function CategoryBlock({
           />
         ))}
         {category.items.length === 0 && (
-          <p className="px-2 py-2 text-sm text-neutral-400">Пока нет позиций.</p>
+          <p className="px-2 py-2 text-sm text-[var(--color-subtle)]">Пока нет позиций.</p>
         )}
       </div>
 
@@ -80,21 +83,15 @@ export function CategoryBlock({
             await createItemAction(formData);
             setAddingItem(false);
           }}
-          className="mt-3 flex flex-col gap-2 rounded-lg bg-neutral-50 p-3"
+          className="mt-3 flex flex-col gap-2 rounded-lg bg-[var(--color-canvas)] p-3"
         >
           <input type="hidden" name="categoryId" value={category.id} />
-          <input
-            type="text"
-            name="name"
-            required
-            placeholder="Название позиции"
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
-          />
+          <input type="text" name="name" required placeholder="Название позиции" className={fieldClass} />
           <input
             type="text"
             name="description"
             placeholder="Описание (необязательно)"
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+            className={fieldClass}
           />
           <div className="flex flex-wrap items-center gap-2">
             <input
@@ -103,25 +100,25 @@ export function CategoryBlock({
               min="0"
               name="price"
               placeholder="Цена"
-              className="w-24 rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+              className={`w-24 ${fieldClass}`}
             />
             <input
               type="text"
               name="currency"
               defaultValue="EUR"
               maxLength={3}
-              className="w-16 rounded-lg border border-neutral-300 px-3 py-2 text-sm uppercase outline-none focus:border-neutral-900"
+              className={`w-16 uppercase ${fieldClass}`}
             />
             <SubmitButton
               pendingLabel="Добавляем…"
-              className="ml-auto rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white"
+              className="ml-auto rounded-full bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-accent-strong)] hover:text-white"
             >
               Добавить
             </SubmitButton>
             <button
               type="button"
               onClick={() => setAddingItem(false)}
-              className="rounded-full border border-neutral-300 px-4 py-2 text-sm"
+              className="rounded-full border border-[var(--color-line)] px-4 py-2 text-sm text-[var(--color-ink)]"
             >
               Отмена
             </button>
@@ -131,7 +128,7 @@ export function CategoryBlock({
         <button
           type="button"
           onClick={() => setAddingItem(true)}
-          className="mt-3 text-sm text-neutral-500 underline"
+          className="mt-3 text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]"
         >
           + Добавить позицию
         </button>

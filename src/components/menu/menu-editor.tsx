@@ -80,15 +80,18 @@ export function MenuEditor({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3">
-        <span className="text-sm text-neutral-600">
-          Статус: <strong>{menuStatus === "PUBLISHED" ? "Опубликовано" : "Черновик"}</strong>
+      <div className="flex items-center justify-between rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3">
+        <span className="flex items-center gap-1.5 text-sm text-[var(--color-subtle)]">
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${menuStatus === "PUBLISHED" ? "bg-[var(--color-accent-strong)]" : "bg-[var(--color-line)]"}`}
+          />
+          Статус: <strong className="text-[var(--color-ink)]">{menuStatus === "PUBLISHED" ? "Опубликовано" : "Черновик"}</strong>
         </span>
         <button
           type="button"
           onClick={togglePublish}
           disabled={isPending}
-          className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700 disabled:opacity-50"
+          className="rounded-full bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-accent-strong)] hover:text-white disabled:opacity-50"
         >
           {menuStatus === "PUBLISHED" ? "Снять с публикации" : "Опубликовать"}
         </button>
@@ -110,7 +113,7 @@ export function MenuEditor({
           />
         ))}
         {categories.length === 0 && (
-          <p className="rounded-lg border border-dashed border-neutral-300 px-4 py-6 text-center text-sm text-neutral-500">
+          <p className="rounded-xl border border-dashed border-[var(--color-line)] px-4 py-6 text-center text-sm text-[var(--color-subtle)]">
             Пока нет категорий — добавьте первую ниже.
           </p>
         )}
@@ -118,7 +121,7 @@ export function MenuEditor({
 
       <form
         action={createCategoryAction}
-        className="flex items-center gap-3 border-t border-neutral-200 pt-6"
+        className="flex items-center gap-3 border-t border-[var(--color-line)] pt-6"
       >
         <input type="hidden" name="menuId" value={menuId} />
         <input
@@ -126,11 +129,11 @@ export function MenuEditor({
           name="name"
           required
           placeholder="Название категории, например «Пицца»"
-          className="flex-1 rounded-lg border border-neutral-300 px-3.5 py-2.5 text-base outline-none focus:border-neutral-900"
+          className="min-w-0 flex-1 rounded-lg border border-[var(--color-line)] bg-[var(--color-surface)] px-3.5 py-2.5 text-base text-[var(--color-ink)] outline-none focus:border-[var(--color-ink)]"
         />
         <SubmitButton
           pendingLabel="Добавляем…"
-          className="whitespace-nowrap rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium transition hover:border-neutral-900"
+          className="whitespace-nowrap rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-5 py-2.5 text-sm font-medium text-[var(--color-ink)] transition hover:border-[var(--color-ink)]"
         >
           + Категория
         </SubmitButton>

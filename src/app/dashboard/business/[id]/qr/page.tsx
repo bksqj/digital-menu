@@ -34,23 +34,25 @@ export default async function QrPage({
   const storage = getStorageAdapter();
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-6 py-16">
+    <main className="mx-auto w-full max-w-md flex-1 px-5 py-12 sm:px-6 sm:py-16">
       <Link
         href={`/dashboard/business/${business.id}`}
-        className="text-sm text-neutral-500 underline"
+        className="text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]"
       >
         ← {business.name}
       </Link>
-      <h1 className="mt-4 mb-8 text-2xl font-semibold">QR-код</h1>
+      <h1 className="mt-4 mb-8 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+        QR-код
+      </h1>
 
-      <div className="flex flex-col items-center gap-6 rounded-2xl border border-neutral-200 p-8">
+      <div className="flex flex-col items-center gap-6 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-8">
         {/* eslint-disable-next-line @next/next/no-img-element -- local file, regenerated per request, not worth next/image config for an MVP */}
         <img
           src={storage.getUrl(pngKey)}
           alt={`QR-код меню ${business.name}`}
-          className="h-64 w-64 rounded-xl"
+          className="h-64 w-64 rounded-xl border border-[var(--color-line)]"
         />
-        <p className="text-center text-sm text-neutral-500 break-all">{menuUrl}</p>
+        <p className="text-center text-sm break-all text-[var(--color-subtle)]">{menuUrl}</p>
         <CopyLinkButton url={menuUrl} />
       </div>
 
@@ -58,21 +60,21 @@ export default async function QrPage({
         <a
           href={storage.getUrl(pngKey)}
           download={`qr-${business.slug}.png`}
-          className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700"
+          className="rounded-full bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-accent-strong)] hover:text-white"
         >
           Скачать PNG
         </a>
         <a
           href={storage.getUrl(svgKey)}
           download={`qr-${business.slug}.svg`}
-          className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium transition hover:border-neutral-900"
+          className="rounded-full border border-[var(--color-line)] px-5 py-2.5 text-sm font-medium text-[var(--color-ink)] transition hover:border-[var(--color-ink)]"
         >
           Скачать SVG
         </a>
         <Link
           href={`/m/${business.slug}`}
           target="_blank"
-          className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium transition hover:border-neutral-900"
+          className="rounded-full border border-[var(--color-line)] px-5 py-2.5 text-sm font-medium text-[var(--color-ink)] transition hover:border-[var(--color-ink)]"
         >
           Открыть меню
         </Link>
@@ -80,7 +82,10 @@ export default async function QrPage({
 
       <form action={regenerateQrAction} className="mt-6 text-center">
         <input type="hidden" name="businessId" value={business.id} />
-        <SubmitButton pendingLabel="Обновляем…" className="text-sm text-neutral-500 underline">
+        <SubmitButton
+          pendingLabel="Обновляем…"
+          className="text-sm text-[var(--color-subtle)] underline hover:text-[var(--color-ink)]"
+        >
           Обновить QR
         </SubmitButton>
       </form>

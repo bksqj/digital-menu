@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getStorageAdapter } from "@/lib/storage";
 import { deleteBusinessAction } from "@/lib/actions/business";
 import { LogoUploader } from "@/components/business/logo-uploader";
+import { LinkIcon, UploadIcon, PencilIcon, LinkQrIcon } from "@/components/ui/icons";
 
 const LOGO_ERROR_MESSAGES: Record<string, string> = {
   no_logo: "Выберите файл логотипа.",
@@ -32,6 +33,7 @@ export default async function BusinessOverviewPage({
   if (business.ownerId !== session.user.id) notFound();
 
   const menu = business.menus[0];
+  const published = menu?.status === "PUBLISHED";
   const storage = getStorageAdapter();
   const logoDisplayUrl = business.logoUrl ? storage.getUrl(business.logoUrl) : null;
 
@@ -40,9 +42,16 @@ export default async function BusinessOverviewPage({
     db.analyticsEvent.count({ where: { businessId: business.id, type: "qr_scan" } }),
   ]);
 
+  const actions = [
+    { href: `/m/${business.slug}`, icon: LinkIcon, label: "Открыть меню" },
+    { href: `/dashboard/business/${business.id}/menu`, icon: UploadIcon, label: "Загрузить меню" },
+    { href: `/dashboard/business/${business.id}/menu/editor`, icon: PencilIcon, label: "Редактировать" },
+    { href: `/dashboard/business/${business.id}/qr`, icon: LinkQrIcon, label: "QR-код" },
+  ];
+
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
-      <Link href="/dashboard" className="text-sm text-neutral-500 underline">
+    <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-6 sm:py-16">
+      <Link href="/dashboard" className="text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]">
         ← Мои бизнесы
       </Link>
 
@@ -52,18 +61,16 @@ export default async function BusinessOverviewPage({
           logoDisplayUrl={logoDisplayUrl}
           businessName={business.name}
         />
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold">{business.name}</h1>
-            <span className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  menu?.status === "PUBLISHED" ? "bg-green-500" : "bg-neutral-400"
-                }`}
-              />
-              {menu?.status === "PUBLISHED" ? "Опубликовано" : "Черновик"}
-            </span>
-          </div>
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+          <h1 className="truncate text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+            {business.name}
+          </h1>
+          <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-1 text-xs font-medium text-[var(--color-subtle)]">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${published ? "bg-[var(--color-accent-strong)]" : "bg-[var(--color-line)]"}`}
+            />
+            {published ? "Опубликовано" : "Черновик"}
+          </span>
         </div>
       </div>
 
@@ -73,47 +80,38 @@ export default async function BusinessOverviewPage({
         </p>
       )}
 
-      <p className="mb-2 text-sm text-neutral-500">
-        Публичная страница: <span className="font-mono">/m/{business.slug}</span>
+      <p className="mb-6 text-sm text-[var(--color-subtle)]">
+        Публичная страница:{" "}
+        <span className="font-mono text-[var(--color-ink)]">/m/{business.slug}</span>
       </p>
 
-      <p className="mb-8 flex gap-4 text-sm text-neutral-500">
-        <span>
-          Просмотры: <span className="font-medium text-neutral-900">{viewCount}</span>
-        </span>
-        <span>
-          Сканирования QR: <span className="font-medium text-neutral-900">{scanCount}</span>
-        </span>
-      </p>
-
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href={`/m/${business.slug}`}
-          className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium transition hover:border-neutral-900"
-        >
-          Открыть меню
-        </Link>
-        <Link
-          href={`/dashboard/business/${business.id}/menu`}
-          className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium transition hover:border-neutral-900"
-        >
-          Загрузить меню
-        </Link>
-        <Link
-          href={`/dashboard/business/${business.id}/menu/editor`}
-          className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium transition hover:border-neutral-900"
-        >
-          Редактировать
-        </Link>
-        <Link
-          href={`/dashboard/business/${business.id}/qr`}
-          className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium transition hover:border-neutral-900"
-        >
-          QR-код
-        </Link>
+      <div className="mb-8 grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3">
+          <p className="text-2xl font-bold tracking-tight text-[var(--color-ink)]">{viewCount}</p>
+          <p className="text-xs text-[var(--color-subtle)]">Просмотры</p>
+        </div>
+        <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3">
+          <p className="text-2xl font-bold tracking-tight text-[var(--color-ink)]">{scanCount}</p>
+          <p className="text-xs text-[var(--color-subtle)]">Сканирования QR</p>
+        </div>
       </div>
 
-      <form action={deleteBusinessAction} className="mt-12 border-t border-neutral-200 pt-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {actions.map((action) => (
+          <Link
+            key={action.label}
+            href={action.href}
+            className="group flex flex-col items-center gap-2 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-4 text-center transition hover:border-[var(--color-accent)] hover:shadow-[0_4px_16px_-8px_rgba(0,0,0,0.1)]"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-canvas)] text-[var(--color-ink)]">
+              <action.icon className="h-4.5 w-4.5" />
+            </span>
+            <span className="text-xs font-medium text-[var(--color-ink)]">{action.label}</span>
+          </Link>
+        ))}
+      </div>
+
+      <form action={deleteBusinessAction} className="mt-12 border-t border-[var(--color-line)] pt-6">
         <input type="hidden" name="id" value={business.id} />
         <button type="submit" className="text-sm text-red-600 underline">
           Удалить бизнес
