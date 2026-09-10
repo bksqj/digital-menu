@@ -31,6 +31,17 @@ model PasswordResetToken {
   @@index([userId])
 }
 
+// Tracks login attempts by raw email string (not userId) so the rate limit
+// applies identically whether or not the email belongs to a real account —
+// otherwise the rate limit itself would leak which emails are registered.
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
 model Business {
   id          String   @id @default(cuid())
   ownerId     String

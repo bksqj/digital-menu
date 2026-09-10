@@ -6,6 +6,7 @@ import { AuthCard, authInputClass, authPrimaryButtonClass } from "@/components/u
 const ERROR_MESSAGES: Record<string, string> = {
   invalid: "Заполните email и пароль.",
   credentials: "Неверный email или пароль.",
+  rate_limited: "Слишком много попыток входа. Попробуйте позже.",
 };
 
 export default async function LoginPage({

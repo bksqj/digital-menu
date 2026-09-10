@@ -16,6 +16,8 @@ import {
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
 const MAX_RESET_REQUESTS_PER_HOUR = 3;
+const LOGIN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_LOGIN_ATTEMPTS_PER_WINDOW = 10;
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -29,6 +31,20 @@ export async function loginAction(formData: FormData) {
   if (!parsed.success) {
     redirect("/login?error=invalid");
   }
+
+  const email = parsed.data.email;
+  const windowStart = new Date(Date.now() - LOGIN_ATTEMPT_WINDOW_MS);
+  // Sweep this email's own stale rows on the way in — keeps the table from
+  // growing unbounded per-user without needing a separate cleanup job.
+  await db.loginAttempt.deleteMany({ where: { email, createdAt: { lt: windowStart } } });
+  const recentAttempts = await db.loginAttempt.count({ where: { email } });
+  if (recentAttempts >= MAX_LOGIN_ATTEMPTS_PER_WINDOW) {
+    redirect("/login?error=rate_limited");
+  }
+  // Logged before the attempt is even validated — same count whether or not
+  // this email belongs to a real account, so the limit itself can't be used
+  // to test which emails are registered.
+  await db.loginAttempt.create({ data: { email } });
 
   try {
     await signIn("credentials", {
