@@ -5,6 +5,19 @@ import { z } from "zod";
  * service is behind it. This is the contract between lib/ocr and the rest
  * of the app — nothing downstream should know which provider produced it.
  */
+// Where, on which source file, a dish photo for this item was spotted — all
+// coordinates normalized 0..1 relative to that file's full width/height.
+// Only meaningful when the source file is an image (not a PDF page); the
+// provider is instructed to omit this entirely rather than guess when
+// there's no clear photo (a logo, icon, or decorative border doesn't count).
+export const photoRegionSchema = z.object({
+  sourceFileIndex: z.number().int().min(0),
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+  width: z.number().min(0).max(1),
+  height: z.number().min(0).max(1),
+});
+
 export const parsedItemSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(500).nullable().optional(),
@@ -13,6 +26,7 @@ export const parsedItemSchema = z.object({
   // 0..1 — how sure the provider is about this item as a whole. Anything
   // below the app's review threshold gets flagged needsReview in the DB.
   confidence: z.number().min(0).max(1),
+  photo: photoRegionSchema.nullable().optional(),
 });
 
 export const parsedCategorySchema = z.object({
@@ -25,6 +39,7 @@ export const menuParseResultSchema = z.object({
   warnings: z.array(z.string()).default([]),
 });
 
+export type PhotoRegion = z.infer<typeof photoRegionSchema>;
 export type ParsedItem = z.infer<typeof parsedItemSchema>;
 export type ParsedCategory = z.infer<typeof parsedCategorySchema>;
 export type MenuParseResult = z.infer<typeof menuParseResultSchema>;

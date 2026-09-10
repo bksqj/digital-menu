@@ -47,7 +47,11 @@ export async function deleteBusinessAction(formData: FormData) {
 
   const business = await db.business.findUnique({
     where: { id },
-    include: { qrCode: true, uploadJobs: { select: { sourceKeys: true } } },
+    include: {
+      qrCode: true,
+      uploadJobs: { select: { sourceKeys: true } },
+      menus: { include: { categories: { include: { items: { select: { imageUrl: true } } } } } },
+    },
   });
   if (!business || business.ownerId !== userId) redirect("/dashboard");
 
@@ -57,11 +61,15 @@ export async function deleteBusinessAction(formData: FormData) {
   // orphaned forever. Best-effort: a failed blob delete shouldn't block
   // removing the business itself.
   const storage = getStorageAdapter();
+  const itemImageKeys = business.menus.flatMap((menu) =>
+    menu.categories.flatMap((category) => category.items.map((item) => item.imageUrl)),
+  );
   const keysToDelete = [
     business.logoUrl,
     business.qrCode?.pngPath,
     business.qrCode?.svgPath,
     ...business.uploadJobs.flatMap((job) => job.sourceKeys),
+    ...itemImageKeys,
   ].filter((key): key is string => Boolean(key));
   await Promise.allSettled(keysToDelete.map((key) => storage.delete(key)));
 

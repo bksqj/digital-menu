@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getStorageAdapter } from "@/lib/storage";
 import { MenuEditor } from "@/components/menu/menu-editor";
 
 export default async function MenuEditorPage({
@@ -37,6 +38,7 @@ export default async function MenuEditorPage({
 
   // Prisma's Decimal isn't a plain object — it can't cross the server/client
   // boundary as a prop, so flatten it to a number here.
+  const storage = getStorageAdapter();
   const categories = menu.categories.map((category) => ({
     id: category.id,
     name: category.name,
@@ -48,6 +50,7 @@ export default async function MenuEditorPage({
       currency: item.currency,
       available: item.available,
       needsReview: item.needsReview,
+      imageUrl: item.imageUrl ? storage.getUrl(item.imageUrl) : null,
     })),
   }));
 

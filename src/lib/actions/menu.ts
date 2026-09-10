@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getStorageAdapter } from "@/lib/storage";
 import { upsertCategorySchema, upsertItemSchema } from "@/lib/validation/menu";
 
 async function requireUserId() {
@@ -75,7 +76,14 @@ export async function deleteCategoryAction(formData: FormData) {
   const categoryId = String(formData.get("categoryId") ?? "");
   const category = await requireCategoryOwner(categoryId, userId);
 
+  // Items cascade-delete with the category, but their image blobs don't —
+  // grab the keys before the row (and the relation to fetch them by) is gone.
+  const items = await db.item.findMany({ where: { categoryId }, select: { imageUrl: true } });
   await db.category.delete({ where: { id: categoryId } });
+  const storage = getStorageAdapter();
+  await Promise.allSettled(
+    items.filter((item) => item.imageUrl).map((item) => storage.delete(item.imageUrl!)),
+  );
   revalidateEditor(category.menu.business.id);
 }
 
@@ -148,6 +156,18 @@ export async function updateItemAction(formData: FormData) {
   revalidateEditor(item.category.menu.business.id);
 }
 
+export async function removeItemImageAction(formData: FormData) {
+  const userId = await requireUserId();
+  const itemId = String(formData.get("itemId") ?? "");
+  const item = await requireItemOwner(itemId, userId);
+
+  if (item.imageUrl) {
+    await getStorageAdapter().delete(item.imageUrl);
+    await db.item.update({ where: { id: itemId }, data: { imageUrl: null } });
+  }
+  revalidateEditor(item.category.menu.business.id);
+}
+
 export async function toggleItemAvailableAction(itemId: string, available: boolean) {
   const userId = await requireUserId();
   const item = await requireItemOwner(itemId, userId);
@@ -160,6 +180,7 @@ export async function deleteItemAction(formData: FormData) {
   const item = await requireItemOwner(itemId, userId);
 
   await db.item.delete({ where: { id: itemId } });
+  if (item.imageUrl) await getStorageAdapter().delete(item.imageUrl).catch(() => {});
   revalidateEditor(item.category.menu.business.id);
 }
 

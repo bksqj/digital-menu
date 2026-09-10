@@ -6,7 +6,10 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getStorageAdapter } from "@/lib/storage";
 import { getOcrProvider } from "@/lib/ocr";
+import { extractItemPhoto } from "@/lib/ocr/extract-photo";
 import { menuParseResultSchema, REVIEW_CONFIDENCE_THRESHOLD } from "@/lib/validation/menu";
+
+const CROPPABLE_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 import {
   ALLOWED_MENU_FILE_TYPES,
   MAX_MENU_FILES,
@@ -84,6 +87,18 @@ export async function uploadMenuFilesAction(formData: FormData) {
     let itemsCreated = 0;
     let itemsFlagged = 0;
 
+    // Source image bytes are only fetched once per file, on first use —
+    // most uploads have far fewer photographed items than source files.
+    const sourceBytesCache = new Map<number, Buffer>();
+    async function getSourceBytes(fileIndex: number): Promise<Buffer | null> {
+      if (sourceBytesCache.has(fileIndex)) return sourceBytesCache.get(fileIndex)!;
+      const file = ocrInputs[fileIndex];
+      if (!file || !CROPPABLE_IMAGE_TYPES.has(file.mimeType)) return null;
+      const bytes = await storage.get(file.key);
+      sourceBytesCache.set(fileIndex, bytes);
+      return bytes;
+    }
+
     for (const category of parsed.categories) {
       const createdCategory = await db.category.create({
         data: { menuId: menu.id, name: category.name, sortOrder: nextCategorySort++ },
@@ -91,7 +106,7 @@ export async function uploadMenuFilesAction(formData: FormData) {
 
       for (const [index, item] of category.items.entries()) {
         const needsReview = item.confidence < REVIEW_CONFIDENCE_THRESHOLD;
-        await db.item.create({
+        const createdItem = await db.item.create({
           data: {
             categoryId: createdCategory.id,
             name: item.name,
@@ -104,6 +119,16 @@ export async function uploadMenuFilesAction(formData: FormData) {
         });
         itemsCreated += 1;
         if (needsReview) itemsFlagged += 1;
+
+        if (item.photo) {
+          const sourceBytes = await getSourceBytes(item.photo.sourceFileIndex);
+          if (sourceBytes) {
+            const imageKey = await extractItemPhoto(storage, sourceBytes, item.photo, createdItem.id);
+            if (imageKey) {
+              await db.item.update({ where: { id: createdItem.id }, data: { imageUrl: imageKey } });
+            }
+          }
+        }
       }
     }
 

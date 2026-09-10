@@ -2,7 +2,12 @@
 
 import { useState, useTransition, type DragEvent } from "react";
 import { useRouter } from "next/navigation";
-import { deleteItemAction, toggleItemAvailableAction, updateItemAction } from "@/lib/actions/menu";
+import {
+  deleteItemAction,
+  removeItemImageAction,
+  toggleItemAvailableAction,
+  updateItemAction,
+} from "@/lib/actions/menu";
 
 export type ItemDTO = {
   id: string;
@@ -12,6 +17,7 @@ export type ItemDTO = {
   currency: string;
   available: boolean;
   needsReview: boolean;
+  imageUrl: string | null;
 };
 
 const fieldClass =
@@ -110,6 +116,23 @@ export function ItemRow({
       <span className="cursor-grab text-[var(--color-line)]" aria-hidden>
         ⠿
       </span>
+      {item.imageUrl && (
+        <div className="group relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-[var(--color-line)]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- OCR-extracted crop, not worth next/image config for an MVP */}
+          <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
+          <form action={removeItemImageAction} className="absolute -top-1 -right-1">
+            <input type="hidden" name="itemId" value={item.id} />
+            <button
+              type="submit"
+              title="Удалить фото"
+              aria-label="Удалить фото"
+              className="flex h-4 w-4 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] text-[10px] text-[var(--color-subtle)] opacity-0 shadow-sm transition group-hover:opacity-100 hover:text-red-600"
+            >
+              ×
+            </button>
+          </form>
+        </div>
+      )}
       <div className="min-w-[140px] flex-1">
         <div className="flex items-center gap-2">
           <span className="font-medium text-[var(--color-ink)]">{item.name}</span>

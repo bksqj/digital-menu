@@ -120,11 +120,21 @@ export default async function PublicMenuPage({
               <ul className="flex flex-col divide-y divide-[var(--color-line)]">
                 {category.items.map((item) => (
                   <li key={item.id} className="flex items-start justify-between gap-4 py-3 first:pt-0">
-                    <div>
-                      <p className="font-medium text-[var(--color-ink)]">{item.name}</p>
-                      {item.description && (
-                        <p className="mt-0.5 text-sm text-[var(--color-subtle)]">{item.description}</p>
+                    <div className="flex items-start gap-3">
+                      {item.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element -- OCR-extracted crop, not worth next/image config for an MVP
+                        <img
+                          src={getStorageAdapter().getUrl(item.imageUrl)}
+                          alt=""
+                          className="h-14 w-14 shrink-0 rounded-lg border border-[var(--color-line)] object-cover"
+                        />
                       )}
+                      <div>
+                        <p className="font-medium text-[var(--color-ink)]">{item.name}</p>
+                        {item.description && (
+                          <p className="mt-0.5 text-sm text-[var(--color-subtle)]">{item.description}</p>
+                        )}
+                      </div>
                     </div>
                     {item.price !== null && (
                       <p className="shrink-0 font-semibold whitespace-nowrap text-[var(--color-ink)]">
