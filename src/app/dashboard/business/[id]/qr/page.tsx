@@ -25,16 +25,15 @@ export default async function QrPage({
   const qrTargetUrl = `${menuUrl}?src=qr`;
 
   const storage = getStorageAdapter();
-  const logoBytes = business.logoUrl ? await storage.get(business.logoUrl) : undefined;
+  // Falls back to no logo instead of crashing the page if the blob is
+  // missing — e.g. a logoUrl recorded while testing against a different
+  // storage backend (local disk vs. Netlify Blobs) than the one live now.
+  const logoBytes = business.logoUrl ? await storage.get(business.logoUrl).catch(() => undefined) : undefined;
 
   // Regenerated on every visit — cheap (local render, no external API) and
   // keeps the QR in sync if the business name/logo changes later. The
   // encoded URL itself never changes, since it's keyed off the stable slug.
-  const { png, svg } = await generateQr({
-    url: qrTargetUrl,
-    businessName: business.name,
-    logo: logoBytes,
-  });
+  const { png, svg } = await generateQr({ url: qrTargetUrl, logo: logoBytes });
   const pngKey = `qr/${business.id}.png`;
   const svgKey = `qr/${business.id}.svg`;
   await storage.put(pngKey, png, "image/png");

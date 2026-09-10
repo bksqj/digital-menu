@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { registerAction } from "@/lib/actions/auth";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 const ERROR_MESSAGES: Record<string, string> = {
   invalid: "Проверьте email и пароль (минимум 8 символов).",
@@ -54,12 +55,12 @@ export default async function RegisterPage({
             className="rounded-lg border border-neutral-300 px-3.5 py-2.5 text-base outline-none focus:border-neutral-900"
           />
         </label>
-        <button
-          type="submit"
+        <SubmitButton
+          pendingLabel="Создаём аккаунт…"
           className="mt-2 rounded-full bg-neutral-900 px-6 py-3 text-base font-medium text-white transition hover:bg-neutral-700"
         >
           Создать аккаунт
-        </button>
+        </SubmitButton>
       </form>
 
       <p className="text-center text-sm text-neutral-500">
