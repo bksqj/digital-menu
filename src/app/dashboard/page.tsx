@@ -2,8 +2,8 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { createBusinessAction } from "@/lib/actions/business";
-import { logoutAction } from "@/lib/actions/auth";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 const ERROR_MESSAGES: Record<string, string> = {
   name: "Введите название бизнеса.",
@@ -23,20 +23,9 @@ export default async function DashboardPage({
   });
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-6 sm:py-16">
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-ink)]">
-            <span className="h-2 w-2 rounded-[2px] bg-[var(--color-accent)]" />
-          </span>
-          <h1 className="text-lg font-bold tracking-tight text-[var(--color-ink)]">Мои бизнесы</h1>
-        </div>
-        <form action={logoutAction}>
-          <button type="submit" className="text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]">
-            Выйти
-          </button>
-        </form>
-      </div>
+    <DashboardShell userEmail={session!.user.email ?? ""}>
+      <div className="mx-auto w-full max-w-2xl px-5 py-12 sm:px-6 sm:py-16">
+      <h1 className="mb-8 text-lg font-bold tracking-tight text-[var(--color-ink)]">Мои бизнесы</h1>
 
       {error && (
         <p className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -91,6 +80,7 @@ export default async function DashboardPage({
           + Создать
         </SubmitButton>
       </form>
-    </main>
+      </div>
+    </DashboardShell>
   );
 }

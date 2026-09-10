@@ -7,7 +7,9 @@ import { getDailyStats } from "@/lib/analytics";
 import { deleteBusinessAction } from "@/lib/actions/business";
 import { LogoUploader } from "@/components/business/logo-uploader";
 import { AnalyticsChart } from "@/components/business/analytics-chart";
-import { LinkIcon, UploadIcon, PencilIcon, LinkQrIcon } from "@/components/ui/icons";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { MobileMenuPreview } from "@/components/admin/mobile-menu-preview";
+import { LinkIcon } from "@/components/ui/icons";
 
 const ANALYTICS_WINDOW_DAYS = 14;
 
@@ -31,7 +33,16 @@ export default async function BusinessOverviewPage({
 
   const business = await db.business.findUnique({
     where: { id },
-    include: { menus: true },
+    include: {
+      menus: {
+        include: {
+          categories: {
+            orderBy: { sortOrder: "asc" },
+            include: { items: { orderBy: { sortOrder: "asc" } } },
+          },
+        },
+      },
+    },
   });
   if (!business) notFound();
   if (business.ownerId !== session.user.id) notFound();
@@ -53,85 +64,99 @@ export default async function BusinessOverviewPage({
     getDailyStats(business.id, ANALYTICS_WINDOW_DAYS),
   ]);
 
-  const actions = [
-    { href: `/m/${business.slug}`, icon: LinkIcon, label: "Открыть меню" },
-    { href: `/dashboard/business/${business.id}/menu`, icon: UploadIcon, label: "Загрузить меню" },
-    { href: `/dashboard/business/${business.id}/menu/editor`, icon: PencilIcon, label: "Редактировать" },
-    { href: `/dashboard/business/${business.id}/qr`, icon: LinkQrIcon, label: "QR-код" },
-  ];
-
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-6 sm:py-16">
-      <Link href="/dashboard" className="text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]">
-        ← Мои бизнесы
-      </Link>
-
-      <div className="mt-4 mb-6 flex items-center gap-4">
-        <LogoUploader
-          businessId={business.id}
-          logoDisplayUrl={logoDisplayUrl}
-          businessName={business.name}
-        />
-        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-          <h1 className="truncate text-2xl font-bold tracking-tight text-[var(--color-ink)]">
-            {business.name}
-          </h1>
-          <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-1 text-xs font-medium text-[var(--color-subtle)]">
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${published ? "bg-[var(--color-accent-strong)]" : "bg-[var(--color-line)]"}`}
-            />
-            {published ? "Опубликовано" : "Черновик"}
-          </span>
-        </div>
-      </div>
-
-      {error && (
-        <p className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-          {LOGO_ERROR_MESSAGES[error] ?? "Что-то пошло не так."}
-        </p>
-      )}
-
-      <p className="mb-6 text-sm text-[var(--color-subtle)]">
-        Публичная страница:{" "}
-        <span className="font-mono text-[var(--color-ink)]">/m/{business.slug}</span>
-      </p>
-
-      <div className="mb-8 grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3">
-          <p className="text-2xl font-bold tracking-tight text-[var(--color-ink)]">{viewCount}</p>
-          <p className="text-xs text-[var(--color-subtle)]">Просмотры</p>
-        </div>
-        <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3">
-          <p className="text-2xl font-bold tracking-tight text-[var(--color-ink)]">{scanCount}</p>
-          <p className="text-xs text-[var(--color-subtle)]">Сканирования QR</p>
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <AnalyticsChart stats={dailyStats} />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {actions.map((action) => (
-          <Link
-            key={action.label}
-            href={action.href}
-            className="group flex flex-col items-center gap-2 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-4 text-center transition hover:border-[var(--color-accent)] hover:shadow-[0_4px_16px_-8px_rgba(0,0,0,0.1)]"
-          >
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-canvas)] text-[var(--color-ink)]">
-              <action.icon className="h-4.5 w-4.5" />
+    <DashboardShell
+      userEmail={session.user.email ?? ""}
+      business={{ id: business.id, name: business.name, slug: business.slug, logoUrl: logoDisplayUrl }}
+    >
+      <div className="mx-auto w-full max-w-4xl px-5 py-12 sm:px-6 sm:py-16">
+        <div className="mb-6 flex items-center gap-4">
+          <LogoUploader
+            businessId={business.id}
+            logoDisplayUrl={logoDisplayUrl}
+            businessName={business.name}
+          />
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+            <h1 className="truncate text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+              {business.name}
+            </h1>
+            <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-1 text-xs font-medium text-[var(--color-subtle)]">
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${published ? "bg-[var(--color-accent-strong)]" : "bg-[var(--color-line)]"}`}
+              />
+              {published ? "Опубликовано" : "Черновик"}
             </span>
-            <span className="text-xs font-medium text-[var(--color-ink)]">{action.label}</span>
-          </Link>
-        ))}
-      </div>
+          </div>
+        </div>
 
-      <form action={deleteBusinessAction} className="mt-12 border-t border-[var(--color-line)] pt-6">
-        <input type="hidden" name="id" value={business.id} />
-        <button type="submit" className="text-sm text-red-600 underline">
-          Удалить бизнес
-        </button>
-      </form>
-    </main>
+        {error && (
+          <p className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            {LOGO_ERROR_MESSAGES[error] ?? "Что-то пошло не так."}
+          </p>
+        )}
+
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <p className="text-sm text-[var(--color-subtle)]">
+            Публичная страница:{" "}
+            <span className="font-mono text-[var(--color-ink)]">/m/{business.slug}</span>
+          </p>
+          <Link
+            href={`/m/${business.slug}`}
+            target="_blank"
+            className="ml-auto flex items-center gap-1.5 rounded-full border border-[var(--color-line)] px-3.5 py-1.5 text-xs font-medium text-[var(--color-ink)] transition hover:border-[var(--color-ink)]"
+          >
+            <LinkIcon className="h-3.5 w-3.5" />
+            Открыть меню
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="flex flex-col gap-6 lg:col-span-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3">
+                <p className="text-2xl font-bold tracking-tight text-[var(--color-ink)]">{viewCount}</p>
+                <p className="text-xs text-[var(--color-subtle)]">Просмотры</p>
+              </div>
+              <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3">
+                <p className="text-2xl font-bold tracking-tight text-[var(--color-ink)]">{scanCount}</p>
+                <p className="text-xs text-[var(--color-subtle)]">Сканирования QR</p>
+              </div>
+            </div>
+
+            <AnalyticsChart stats={dailyStats} />
+
+            <form action={deleteBusinessAction} className="border-t border-[var(--color-line)] pt-6">
+              <input type="hidden" name="id" value={business.id} />
+              <button type="submit" className="text-sm text-red-600 underline">
+                Удалить бизнес
+              </button>
+            </form>
+          </div>
+
+          <div>
+            <p className="mb-3 text-sm font-semibold text-[var(--color-ink)]">Превью меню</p>
+            <MobileMenuPreview
+              businessName={business.name}
+              logoUrl={logoDisplayUrl}
+              categories={
+                menu?.categories.map((c) => ({
+                  id: c.id,
+                  name: c.name,
+                  items: c.items
+                    .filter((i) => i.available)
+                    .map((i) => ({
+                      id: i.id,
+                      name: i.name,
+                      description: i.description,
+                      price: i.price ? Number(i.price) : null,
+                      currency: i.currency,
+                    })),
+                })) ?? []
+              }
+            />
+          </div>
+        </div>
+      </div>
+    </DashboardShell>
   );
 }

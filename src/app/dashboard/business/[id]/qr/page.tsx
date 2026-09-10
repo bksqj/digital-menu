@@ -6,6 +6,7 @@ import { getStorageAdapter } from "@/lib/storage";
 import { buildAndStoreQr, regenerateQrAction } from "@/lib/actions/qr";
 import { CopyLinkButton } from "@/components/business/copy-link-button";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 export default async function QrPage({
   params,
@@ -40,16 +41,17 @@ export default async function QrPage({
   const version = updatedAt.getTime();
   const pngUrl = `${storage.getUrl(pngKey)}?v=${version}`;
   const svgUrl = `${storage.getUrl(svgKey)}?v=${version}`;
+  const logoDisplayUrl = business.logoUrl
+    ? `${storage.getUrl(business.logoUrl)}?v=${business.updatedAt.getTime()}`
+    : null;
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-5 py-12 sm:px-6 sm:py-16">
-      <Link
-        href={`/dashboard/business/${business.id}`}
-        className="text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]"
-      >
-        ← {business.name}
-      </Link>
-      <h1 className="mt-4 mb-8 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+    <DashboardShell
+      userEmail={session.user.email ?? ""}
+      business={{ id: business.id, name: business.name, slug: business.slug, logoUrl: logoDisplayUrl }}
+    >
+      <div className="mx-auto w-full max-w-md px-5 py-12 sm:px-6 sm:py-16">
+      <h1 className="mb-8 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
         QR-код
       </h1>
 
@@ -97,6 +99,7 @@ export default async function QrPage({
           Обновить QR
         </SubmitButton>
       </form>
-    </main>
+      </div>
+    </DashboardShell>
   );
 }

@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getStorageAdapter } from "@/lib/storage";
 import { UploadMenuForm } from "@/components/menu/upload-form";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 const ERROR_MESSAGES: Record<string, string> = {
   no_files: "Выберите хотя бы один файл.",
@@ -31,39 +33,43 @@ export default async function MenuUploadPage({
   if (!business) notFound();
   if (business.ownerId !== session.user.id) notFound();
 
+  const storage = getStorageAdapter();
+  const logoDisplayUrl = business.logoUrl
+    ? `${storage.getUrl(business.logoUrl)}?v=${business.updatedAt.getTime()}`
+    : null;
+
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-6 sm:py-16">
-      <Link
-        href={`/dashboard/business/${business.id}`}
-        className="text-sm text-[var(--color-subtle)] hover:text-[var(--color-ink)]"
-      >
-        ← {business.name}
-      </Link>
-      <h1 className="mt-4 mb-2 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
-        Загрузить меню
-      </h1>
-      <p className="mb-8 text-sm text-[var(--color-subtle)]">
-        Сфотографируйте бумажное меню или прайс — мы распознаем позиции и категории, а вы
-        проверите результат перед публикацией.
-      </p>
-
-      {error && (
-        <p className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-          {ERROR_MESSAGES[error] ?? "Что-то пошло не так, попробуйте ещё раз."}
+    <DashboardShell
+      userEmail={session.user.email ?? ""}
+      business={{ id: business.id, name: business.name, slug: business.slug, logoUrl: logoDisplayUrl }}
+    >
+      <div className="mx-auto w-full max-w-2xl px-5 py-12 sm:px-6 sm:py-16">
+        <h1 className="mb-2 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+          Загрузить меню
+        </h1>
+        <p className="mb-8 text-sm text-[var(--color-subtle)]">
+          Сфотографируйте бумажное меню или прайс — мы распознаем позиции и категории, а вы
+          проверите результат перед публикацией.
         </p>
-      )}
 
-      <UploadMenuForm businessId={business.id} />
+        {error && (
+          <p className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            {ERROR_MESSAGES[error] ?? "Что-то пошло не так, попробуйте ещё раз."}
+          </p>
+        )}
 
-      <p className="mt-8 text-center text-sm text-[var(--color-subtle)]">
-        Или сразу{" "}
-        <Link
-          href={`/dashboard/business/${business.id}/menu/editor`}
-          className="font-medium text-[var(--color-ink)] underline"
-        >
-          добавьте меню вручную
-        </Link>
-      </p>
-    </main>
+        <UploadMenuForm businessId={business.id} />
+
+        <p className="mt-8 text-center text-sm text-[var(--color-subtle)]">
+          Или сразу{" "}
+          <Link
+            href={`/dashboard/business/${business.id}/menu/editor`}
+            className="font-medium text-[var(--color-ink)] underline"
+          >
+            добавьте меню вручную
+          </Link>
+        </p>
+      </div>
+    </DashboardShell>
   );
 }
