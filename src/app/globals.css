@@ -15,6 +15,17 @@
   --color-accent: #a3e635;
   --color-accent-strong: #65a30d;
   --color-accent-soft: #ecfccb;
+
+  /* Admin panel design system — denser, darker sidebar, its own lime tone.
+     Scoped by convention (only src/app/admin/* and components/admin/* use
+     these) so the rest of the app is untouched. */
+  --admin-bg: #f7f7f5;
+  --admin-card: #ffffff;
+  --admin-ink: #161616;
+  --admin-muted: #737373;
+  --admin-border: #e8e8e4;
+  --admin-accent: #c8ff00;
+  --admin-dark: #111111;
 }
 
 @keyframes landing-float {

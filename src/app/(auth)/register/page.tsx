@@ -6,6 +6,7 @@ import { AuthCard, authInputClass, authPrimaryButtonClass } from "@/components/u
 const ERROR_MESSAGES: Record<string, string> = {
   invalid: "Проверьте email и пароль (минимум 8 символов).",
   exists: "Этот email уже зарегистрирован. Попробуйте войти.",
+  registration_disabled: "Регистрация новых аккаунтов временно приостановлена.",
 };
 
 export default async function RegisterPage({

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { after } from "next/server";
 import { db } from "@/lib/db";
 import { getStorageAdapter } from "@/lib/storage";
+import { getPlatformSettings } from "@/lib/admin/settings";
 
 async function getPublishedBusiness(slug: string) {
   return db.business.findUnique({
@@ -54,14 +55,16 @@ export default async function PublicMenuPage({
 
   if (business) {
     // Fires after the response is sent — a guest's phone shouldn't wait on
-    // an analytics write. `src=qr` is the marker the QR code itself encodes
-    // (see lib/qr usage in the qr page) so scans count separately from
-    // regular link views.
-    after(() =>
-      db.analyticsEvent.create({
+    // an analytics write (or on the settings lookup that gates it). `src=qr`
+    // is the marker the QR code itself encodes (see lib/qr usage in the qr
+    // page) so scans count separately from regular link views.
+    after(async () => {
+      const settings = await getPlatformSettings();
+      if (!settings.analyticsEnabled) return;
+      await db.analyticsEvent.create({
         data: { businessId: business.id, type: src === "qr" ? "qr_scan" : "view" },
-      }),
-    );
+      });
+    });
   }
 
   if (!business || !menu) {

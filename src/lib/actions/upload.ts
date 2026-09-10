@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { getStorageAdapter } from "@/lib/storage";
 import { getOcrProvider } from "@/lib/ocr";
 import { extractItemPhoto } from "@/lib/ocr/extract-photo";
+import { getPlatformSettings } from "@/lib/admin/settings";
 import { menuParseResultSchema, REVIEW_CONFIDENCE_THRESHOLD } from "@/lib/validation/menu";
 
 const CROPPABLE_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -37,6 +38,9 @@ export async function uploadMenuFilesAction(formData: FormData) {
   if (!menu) redirect(`/dashboard/business/${businessId}`);
 
   const menuPath = `/dashboard/business/${businessId}/menu`;
+
+  const settings = await getPlatformSettings();
+  if (!settings.aiEnabled) redirect(`${menuPath}?error=ai_disabled`);
 
   const recentUploads = await db.uploadJob.count({
     where: {

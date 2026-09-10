@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { signIn, signOut } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
+import { getPlatformSettings } from "@/lib/admin/settings";
 import {
   loginSchema,
   registerSchema,
@@ -61,6 +62,9 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function registerAction(formData: FormData) {
+  const settings = await getPlatformSettings();
+  if (!settings.registrationEnabled) redirect("/register?error=registration_disabled");
+
   const parsed = registerSchema.safeParse({
     name: formData.get("name") || undefined,
     email: formData.get("email"),

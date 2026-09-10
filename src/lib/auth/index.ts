@@ -31,7 +31,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
 
-        return { id: user.id, email: user.email, name: user.name ?? undefined };
+        // Checked at login, not per-request — an admin suspending someone
+        // mid-session won't kick them out immediately (JWT strategy has no
+        // server-side session to revoke), but blocks every new sign-in.
+        if (user.suspended) return null;
+
+        // Fire-and-forget: powers the admin "last active" column. Not
+        // awaited — a slow write here shouldn't add latency to every login.
+        db.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
+
+        return { id: user.id, email: user.email, name: user.name ?? undefined, role: user.role };
       },
     }),
   ],

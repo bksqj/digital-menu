@@ -6,15 +6,49 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id                  String               @id @default(cuid())
   email               String               @unique
   passwordHash        String
   name                String?
+  role                UserRole             @default(USER)
+  // Blocks login (checked in authorize()) — a lighter-weight moderation tool
+  // than deletion, reversible from /admin/users.
+  suspended           Boolean              @default(false)
+  // Set on every successful authorize() — powers the admin "last active"
+  // column, which otherwise has no data source at all.
+  lastLoginAt         DateTime?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   businesses          Business[]
   passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
+
+  @@index([role])
+}
+
+// Only for admin-initiated actions (role changes, suspend/restore) — these
+// leave no other trace in the data. Ordinary platform events (registration,
+// business/menu creation, AI processing) are NOT logged here; the admin
+// activity feed reads those straight off existing createdAt/updatedAt
+// columns instead of instrumenting every existing write path in the app.
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action     String
+  targetType String
+  targetId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([targetType, targetId])
 }
 
 model PasswordResetToken {
@@ -29,6 +63,23 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 
   @@index([userId])
+}
+
+// Single row (id is always "singleton"). Deliberately just three real
+// on/off switches — checked in registerAction/uploadMenuFilesAction/the
+// public page's analytics write — rather than a full settings system for
+// values (upload size limits etc.) that nothing outside their own hardcoded
+// constants currently reads. platformName/supportEmail are stored but not
+// yet wired into anything (no page reads them) — kept honestly separate
+// from the functional toggles below.
+model PlatformSettings {
+  id                  String   @id @default("singleton")
+  platformName        String   @default("Digital Menu")
+  supportEmail        String?
+  registrationEnabled Boolean  @default(true)
+  aiEnabled           Boolean  @default(true)
+  analyticsEnabled    Boolean  @default(true)
+  updatedAt           DateTime @updatedAt
 }
 
 // Tracks login attempts by raw email string (not userId) so the rate limit
