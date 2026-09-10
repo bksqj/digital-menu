@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  businesses   Business[]
+}
+
+model Business {
+  id          String   @id @default(cuid())
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String   @unique
+  logoUrl     String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  menus       Menu[]
+  qrCode      QrCode?
+  events      AnalyticsEvent[]
+  uploadJobs  UploadJob[]
+
+  @@index([ownerId])
+}
+
+enum MenuStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Menu {
+  id         String     @id @default(cuid())
+  businessId String
+  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  language   String     @default("ru")
+  title      String?
+  status     MenuStatus @default(DRAFT)
+  isDefault  Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  categories Category[]
+
+  @@unique([businessId, language])
+  @@index([businessId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items     Item[]
+
+  @@index([menuId])
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Decimal? @db.Decimal(10, 2)
+  currency    String   @default("EUR")
+  imageUrl    String?
+  sortOrder   Int      @default(0)
+  available   Boolean  @default(true)
+  // true if OCR/AI had low confidence in this value — surfaced to the owner for review
+  needsReview Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categoryId])
+}
+
+model QrCode {
+  id         String   @id @default(cuid())
+  businessId String   @unique
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  svgPath    String?
+  pngPath    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// "view" | "qr_scan" — kept intentionally loose for MVP, can split into a typed
+// table (or a real analytics service) later without touching the write path.
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  type       String
+  createdAt  DateTime @default(now())
+
+  @@index([businessId, type, createdAt])
+}
+
+enum UploadJobStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+model UploadJob {
+  id          String          @id @default(cuid())
+  businessId  String
+  business    Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  status      UploadJobStatus @default(PENDING)
+  sourceKeys  String[]
+  resultJson  Json?
+  error       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([businessId])
+}
