@@ -3,4 +3,52 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Landing page design system — warm off-white canvas, near-black ink,
+     one lime accent. Scoped by convention (only components/landing/* use
+     these) so the rest of the app keeps its existing neutral palette. */
+  --color-canvas: #fafaf7;
+  --color-surface: #ffffff;
+  --color-ink: #0a0a0a;
+  --color-subtle: #6b6b62;
+  --color-line: #eae9e2;
+  --color-accent: #a3e635;
+  --color-accent-strong: #65a30d;
+  --color-accent-soft: #ecfccb;
+}
+
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-landing-float {
+  animation: landing-float 5s ease-in-out infinite;
+}
+
+.animate-landing-fade-up {
+  animation: landing-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-landing-float,
+  .animate-landing-fade-up {
+    animation: none;
+  }
 }
