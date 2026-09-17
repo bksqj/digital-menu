@@ -25,9 +25,15 @@ export function Footer() {
           </Link>
         </nav>
       </div>
-      <p className="mt-8 text-center text-xs text-[var(--color-subtle)]">
-        © {new Date().getFullYear()} Digital Menu
-      </p>
+      <div className="mt-8 flex flex-col items-center gap-2 text-center text-xs text-[var(--color-subtle)] sm:flex-row sm:justify-center sm:gap-4">
+        <p>© {new Date().getFullYear()} Digital Menu</p>
+        <Link href="/terms" className="hover:text-[var(--color-ink)]">
+          Пользовательское соглашение
+        </Link>
+        <Link href="/privacy" className="hover:text-[var(--color-ink)]">
+          Политика конфиденциальности
+        </Link>
+      </div>
     </footer>
   );
 }

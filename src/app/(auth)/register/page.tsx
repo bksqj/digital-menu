@@ -52,6 +52,18 @@ export default async function RegisterPage({
         </SubmitButton>
       </form>
 
+      <p className="mt-4 text-center text-xs text-[var(--color-subtle)]">
+        Создавая аккаунт, вы соглашаетесь с{" "}
+        <Link href="/terms" className="underline hover:text-[var(--color-ink)]">
+          условиями использования
+        </Link>{" "}
+        и{" "}
+        <Link href="/privacy" className="underline hover:text-[var(--color-ink)]">
+          политикой конфиденциальности
+        </Link>
+        .
+      </p>
+
       <p className="mt-6 text-center text-sm text-[var(--color-subtle)]">
         Уже есть аккаунт?{" "}
         <Link href="/login" className="font-medium text-[var(--color-ink)] underline">
