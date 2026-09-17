@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GridIcon, UploadIcon, PencilIcon, LinkQrIcon, LogoutIcon, BuildingIcon } from "@/components/ui/icons";
+import {
+  GridIcon,
+  UploadIcon,
+  PencilIcon,
+  LinkQrIcon,
+  LogoutIcon,
+  BuildingIcon,
+  ChartIcon,
+  UserCircleIcon,
+} from "@/components/ui/icons";
 import { logoutAction } from "@/lib/actions/auth";
 
 type ActiveBusiness = { id: string; name: string; slug: string; logoUrl: string | null };
@@ -22,6 +31,7 @@ export function DashboardSidebar({
         { href: `/dashboard/business/${business.id}/menu`, label: "Загрузить меню", icon: UploadIcon },
         { href: `/dashboard/business/${business.id}/menu/editor`, label: "Редактор меню", icon: PencilIcon },
         { href: `/dashboard/business/${business.id}/qr`, label: "QR-код", icon: LinkQrIcon },
+        { href: `/dashboard/business/${business.id}/analytics`, label: "Аналитика", icon: ChartIcon },
       ]
     : [];
 
@@ -79,7 +89,18 @@ export function DashboardSidebar({
       )}
 
       <div className="mt-4 border-t border-[var(--color-line)] pt-3">
-        <p className="truncate px-2 text-xs text-[var(--color-subtle)]">{userEmail}</p>
+        <Link
+          href="/dashboard/profile"
+          className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
+            pathname === "/dashboard/profile"
+              ? "bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)]"
+              : "text-[var(--color-subtle)] hover:bg-[var(--color-canvas)] hover:text-[var(--color-ink)]"
+          }`}
+        >
+          <UserCircleIcon className="h-4 w-4 shrink-0" />
+          Профиль
+        </Link>
+        <p className="truncate px-3 pt-2 text-xs text-[var(--color-subtle)]">{userEmail}</p>
         <form action={logoutAction}>
           <button
             type="submit"

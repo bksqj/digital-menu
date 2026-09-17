@@ -3,6 +3,7 @@ import { after } from "next/server";
 import { db } from "@/lib/db";
 import { getStorageAdapter } from "@/lib/storage";
 import { getPlatformSettings } from "@/lib/admin/settings";
+import { MenuCategoryTabs } from "@/components/menu/category-tabs";
 
 async function getPublishedBusiness(slug: string) {
   return db.business.findUnique({
@@ -113,43 +114,20 @@ export default async function PublicMenuPage({
       {categoriesWithItems.length === 0 ? (
         <p className="text-center text-sm text-[var(--color-subtle)]">Меню скоро появится.</p>
       ) : (
-        <div className="flex flex-col gap-8">
-          {categoriesWithItems.map((category) => (
-            <section key={category.id}>
-              <h2 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-[var(--color-subtle)] uppercase">
-                <span className="h-2.5 w-1 rounded-full bg-[var(--color-accent)]" />
-                {category.name}
-              </h2>
-              <ul className="flex flex-col divide-y divide-[var(--color-line)]">
-                {category.items.map((item) => (
-                  <li key={item.id} className="flex items-start justify-between gap-4 py-3 first:pt-0">
-                    <div className="flex items-start gap-3">
-                      {item.imageUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element -- OCR-extracted crop, not worth next/image config for an MVP
-                        <img
-                          src={getStorageAdapter().getUrl(item.imageUrl)}
-                          alt=""
-                          className="h-14 w-14 shrink-0 rounded-lg border border-[var(--color-line)] object-cover"
-                        />
-                      )}
-                      <div>
-                        <p className="font-medium text-[var(--color-ink)]">{item.name}</p>
-                        {item.description && (
-                          <p className="mt-0.5 text-sm text-[var(--color-subtle)]">{item.description}</p>
-                        )}
-                      </div>
-                    </div>
-                    {item.price !== null && (
-                      <p className="shrink-0 font-semibold whitespace-nowrap text-[var(--color-ink)]">
-                        {Number(item.price)} {item.currency}
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
+        <MenuCategoryTabs
+          categories={categoriesWithItems.map((category) => ({
+            id: category.id,
+            name: category.name,
+            items: category.items.map((item) => ({
+              id: item.id,
+              name: item.name,
+              description: item.description,
+              price: item.price !== null ? Number(item.price) : null,
+              currency: item.currency,
+              imageUrl: item.imageUrl ? getStorageAdapter().getUrl(item.imageUrl) : null,
+            })),
+          }))}
+        />
       )}
 
       <footer className="mt-12 border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-subtle)]">

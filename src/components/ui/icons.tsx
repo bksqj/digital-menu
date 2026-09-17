@@ -193,6 +193,33 @@ export function MenuIcon({ className }: IconProps) {
   );
 }
 
+export function HomeIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${base} ${className ?? ""}`} {...strokeProps}>
+      <path d="M4 11.5L12 4l8 7.5" />
+      <path d="M6 10v9.2a.8.8 0 00.8.8H10v-5.5h4V20h3.2a.8.8 0 00.8-.8V10" />
+    </svg>
+  );
+}
+
+export function UserCircleIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${base} ${className ?? ""}`} {...strokeProps}>
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="9.8" r="2.8" />
+      <path d="M6.2 18.2c1.1-2.4 3.2-3.7 5.8-3.7s4.7 1.3 5.8 3.7" />
+    </svg>
+  );
+}
+
+export function ChevronRightIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${base} ${className ?? ""}`} {...strokeProps}>
+      <path d="M9 5l7 7-7 7" />
+    </svg>
+  );
+}
+
 export function XIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={`${base} ${className ?? ""}`} {...strokeProps}>

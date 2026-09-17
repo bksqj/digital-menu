@@ -35,3 +35,60 @@ export async function getDailyStats(businessId: string, days: number): Promise<D
 
   return [...buckets.values()];
 }
+
+export type PeriodComparison = {
+  views: number;
+  scans: number;
+  viewsDeltaPct: number | null;
+  scansDeltaPct: number | null;
+};
+
+function deltaPct(current: number, previous: number): number | null {
+  // null covers both "no baseline to compare against" (previous=0, current>0)
+  // and "nothing happened either period" (both 0) — neither has a meaningful
+  // percentage to show.
+  if (previous === 0) return null;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+/**
+ * Totals for the last `days` days plus the percent change against the
+ * preceding period of equal length (e.g. this 30 days vs the 30 days before
+ * that) — `null` when there's no previous-period baseline to compare to,
+ * since a percentage against zero is meaningless rather than "infinite".
+ */
+export async function getPeriodComparison(businessId: string, days: number): Promise<PeriodComparison> {
+  const currentStart = new Date();
+  currentStart.setUTCDate(currentStart.getUTCDate() - (days - 1));
+  currentStart.setUTCHours(0, 0, 0, 0);
+  const previousStart = new Date(currentStart);
+  previousStart.setUTCDate(previousStart.getUTCDate() - days);
+
+  const [current, previous] = await Promise.all([
+    db.analyticsEvent.groupBy({
+      by: ["type"],
+      where: { businessId, createdAt: { gte: currentStart }, type: { in: ["view", "qr_scan"] } },
+      _count: { _all: true },
+    }),
+    db.analyticsEvent.groupBy({
+      by: ["type"],
+      where: { businessId, createdAt: { gte: previousStart, lt: currentStart }, type: { in: ["view", "qr_scan"] } },
+      _count: { _all: true },
+    }),
+  ]);
+
+  const count = (rows: typeof current, type: string) =>
+    rows.find((r) => r.type === type)?._count._all ?? 0;
+
+  const views = count(current, "view");
+  const scans = count(current, "qr_scan");
+  const prevViews = count(previous, "view");
+  const prevScans = count(previous, "qr_scan");
+
+  return {
+    views,
+    scans,
+    viewsDeltaPct: deltaPct(views, prevViews),
+    scansDeltaPct: deltaPct(scans, prevScans),
+  };
+}

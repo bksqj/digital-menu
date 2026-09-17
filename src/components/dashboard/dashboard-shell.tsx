@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { DashboardSidebar } from "./dashboard-sidebar";
+import { DashboardTabBar } from "./dashboard-tab-bar";
 import { MenuIcon, XIcon } from "@/components/ui/icons";
 
 type ActiveBusiness = { id: string; name: string; slug: string; logoUrl: string | null };
@@ -60,8 +61,10 @@ export function DashboardShell({
           </span>
         </header>
 
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pb-16 md:pb-0">{children}</main>
       </div>
+
+      <DashboardTabBar business={business ?? null} />
     </div>
   );
 }
