@@ -2,6 +2,8 @@
   "name": "digital-menu",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Digital Menu",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
